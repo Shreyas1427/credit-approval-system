@@ -1,0 +1,8 @@
+django>=4.0
+djangorestframework
+psycopg2-binary
+gunicorn
+celery
+redis
+openpyxl
+pandas

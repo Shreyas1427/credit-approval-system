@@ -1,0 +1,43 @@
+
+
+services:
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=credit_db
+      - POSTGRES_USER=credit_user
+      - POSTGRES_PASSWORD=credit_password
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis_broker
+
+  web:
+    build: .
+    container_name: django_web
+    command: gunicorn core.wsgi:application --bind 0.0.0.0:8000
+    volumes:
+      - ./src:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+
+  worker:
+    build: .
+    container_name: celery_worker
+    command: celery -A core worker -l info
+    volumes:
+      - ./src:/app
+    depends_on:
+      - web
+      - redis
+
+volumes:
+  postgres_data:

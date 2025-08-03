@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credit Approval System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .form-section { transition: all 0.3s ease-in-out; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-bold text-gray-900">Credit Approval System</h1>
+            <p class="text-lg text-gray-600 mt-2">A simple interface to interact with the loan management API.</p>
+        </header>
+
+        <main class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            
+            <!-- Register Customer -->
+            <div class="form-section bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-semibold mb-4 border-b pb-2">1. Register Customer</h2>
+                <form id="registerForm">
+                    <div class="mb-4">
+                        <label for="firstName" class="block text-sm font-medium text-gray-700">First Name</label>
+                        <input type="text" id="firstName" name="first_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="lastName" class="block text-sm font-medium text-gray-700">Last Name</label>
+                        <input type="text" id="lastName" name="last_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="age" class="block text-sm font-medium text-gray-700">Age</label>
+                        <input type="number" id="age" name="age" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="monthlySalary" class="block text-sm font-medium text-gray-700">Monthly Salary</label>
+                        <input type="number" id="monthlySalary" name="monthly_salary" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="phoneNumber" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                        <input type="tel" id="phoneNumber" name="phone_number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Register</button>
+                </form>
+            </div>
+
+            <!-- Check Eligibility -->
+            <div class="form-section bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-semibold mb-4 border-b pb-2">2. Check Loan Eligibility</h2>
+                <form id="eligibilityForm">
+                    <div class="mb-4">
+                        <label for="eligibilityCustomerId" class="block text-sm font-medium text-gray-700">Customer ID</label>
+                        <input type="number" id="eligibilityCustomerId" name="customer_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="eligibilityLoanAmount" class="block text-sm font-medium text-gray-700">Loan Amount</label>
+                        <input type="number" id="eligibilityLoanAmount" name="loan_amount" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="eligibilityInterestRate" class="block text-sm font-medium text-gray-700">Interest Rate (%)</label>
+                        <input type="number" step="0.1" id="eligibilityInterestRate" name="interest_rate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="eligibilityTenure" class="block text-sm font-medium text-gray-700">Tenure (Months)</label>
+                        <input type="number" id="eligibilityTenure" name="tenure" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    </div>
+                    <button type="submit" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">Check Eligibility</button>
+                </form>
+            </div>
+
+            <!-- Create Loan -->
+            <div class="form-section bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-semibold mb-4 border-b pb-2">3. Create Loan</h2>
+                <form id="createLoanForm">
+                    <div class="mb-4">
+                        <label for="createLoanCustomerId" class="block text-sm font-medium text-gray-700">Customer ID</label>
+                        <input type="number" id="createLoanCustomerId" name="customer_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="createLoanAmount" class="block text-sm font-medium text-gray-700">Loan Amount</label>
+                        <input type="number" id="createLoanAmount" name="loan_amount" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="createLoanInterestRate" class="block text-sm font-medium text-gray-700">Interest Rate (%)</label>
+                        <input type="number" step="0.1" id="createLoanInterestRate" name="interest_rate" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="createLoanTenure" class="block text-sm font-medium text-gray-700">Tenure (Months)</label>
+                        <input type="number" id="createLoanTenure" name="tenure" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Create Loan</button>
+                </form>
+            </div>
+
+            <!-- View Single Loan -->
+            <div class="form-section bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-semibold mb-4 border-b pb-2">4. View Loan Details</h2>
+                <form id="viewLoanForm">
+                    <div class="mb-4">
+                        <label for="viewLoanId" class="block text-sm font-medium text-gray-700">Loan ID</label>
+                        <input type="number" id="viewLoanId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    </div>
+                    <button type="submit" class="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500">View Loan</button>
+                </form>
+            </div>
+
+            <!-- View Customer Loans -->
+            <div class="form-section bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-semibold mb-4 border-b pb-2">5. View All Loans for a Customer</h2>
+                <form id="viewCustomerLoansForm">
+                    <div class="mb-4">
+                        <label for="viewCustomerId" class="block text-sm font-medium text-gray-700">Customer ID</label>
+                        <input type="number" id="viewCustomerId" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
+                    </div>
+                    <button type="submit" class="w-full bg-pink-600 text-white py-2 px-4 rounded-md hover:bg-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500">View Customer's Loans</button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal for displaying results -->
+    <div id="resultModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+            <div class="mt-3 text-center">
+                <h3 class="text-2xl leading-6 font-bold text-gray-900" id="modalTitle">API Response</h3>
+                <div class="mt-4 px-7 py-3">
+                    <pre id="modalContent" class="text-left text-sm bg-gray-100 p-4 rounded-md overflow-x-auto"></pre>
+                </div>
+                <div class="items-center px-4 py-3">
+                    <button id="closeModal" class="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = '/api'; // We will use a relative URL
+
+        const modal = document.getElementById('resultModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalContent = document.getElementById('modalContent');
+        const closeModalBtn = document.getElementById('closeModal');
+
+        function showModal(title, data) {
+            modalTitle.textContent = title;
+            modalContent.textContent = JSON.stringify(data, null, 2);
+            modal.classList.remove('hidden');
+        }
+
+        closeModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+            }
+        });
+
+        async function handleRequest(url, options = {}) {
+            try {
+                const response = await fetch(url, options);
+                const data = await response.json();
+                if (!response.ok) {
+                    showModal(`Error: ${response.status}`, data);
+                } else {
+                    showModal('Success!', data);
+                }
+            } catch (error) {
+                showModal('Network Error', { error: error.message });
+            }
+        }
+
+        // 1. Register Customer
+        document.getElementById('registerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            handleRequest(`${BASE_URL}/register/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        });
+
+        // 2. Check Eligibility
+        document.getElementById('eligibilityForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            handleRequest(`${BASE_URL}/check-eligibility/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        });
+
+        // 3. Create Loan
+        document.getElementById('createLoanForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData.entries());
+            handleRequest(`${BASE_URL}/create-loan/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+        });
+
+        // 4. View Single Loan
+        document.getElementById('viewLoanForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const loanId = e.target.elements.viewLoanId.value;
+            if (loanId) {
+                handleRequest(`${BASE_URL}/view-loan/${loanId}/`);
+            }
+        });
+
+        // 5. View Customer Loans
+        document.getElementById('viewCustomerLoansForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const customerId = e.target.elements.viewCustomerId.value;
+            if (customerId) {
+                handleRequest(`${BASE_URL}/view-loans/${customerId}/`);
+            }
+        });
+    </script>
+</body>
+</html>
