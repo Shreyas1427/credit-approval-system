@@ -51,42 +51,59 @@ class CheckEligibilityAPIView(generics.GenericAPIView):
         tenure = data['tenure']
 
         credit_score = calculate_credit_score(customer_id)
-        customer = Customer.objects.get(pk=customer_id)
         
-        current_loans = Loan.objects.filter(customer=customer, end_date__gte=date.today())
-        sum_of_emis = current_loans.aggregate(total_emi=Sum('monthly_repayment'))['total_emi'] or 0
+        try:
+            customer = Customer.objects.get(pk=customer_id)
+        except Customer.DoesNotExist:
+            return Response({"error": "Customer not found"}, status=status.HTTP_404_NOT_FOUND)
 
+        # --- Definitive Corrected Logic ---
         approval = False
         corrected_interest_rate = None
+        final_interest_rate = interest_rate
+        
+        # Determine the minimum interest rate allowed for the customer's credit score tier
+        min_rate_for_tier = None
+        can_be_approved = True
 
+        if credit_score > 50:
+            min_rate_for_tier = 10.0  # Minimum rate for the best customers
+        elif 30 < credit_score <= 50:
+            min_rate_for_tier = 12.0
+        elif 10 < credit_score <= 30:
+            min_rate_for_tier = 16.0
+        else: # score < 10
+            can_be_approved = False
+
+        if can_be_approved:
+            if interest_rate >= min_rate_for_tier:
+                approval = True
+            else:
+                # The loan can be approved, but at the tier's minimum required rate
+                approval = True
+                corrected_interest_rate = min_rate_for_tier
+                final_interest_rate = min_rate_for_tier
+        
+        # Final check: The 50% EMI rule overrides everything
+        current_loans = Loan.objects.filter(customer=customer, end_date__gte=date.today())
+        sum_of_emis = current_loans.aggregate(total_emi=Sum('monthly_repayment'))['total_emi'] or 0
         if sum_of_emis > customer.monthly_salary / 2:
             approval = False
-        else:
-            if credit_score > 50:
-                approval = True
-            elif 30 < credit_score <= 50:
-                if interest_rate > 12:
-                    approval = True
-                else:
-                    corrected_interest_rate = 12.0
-            elif 10 < credit_score <= 30:
-                if interest_rate > 16:
-                    approval = True
-                else:
-                    corrected_interest_rate = 16.0
+            corrected_interest_rate = None # Not applicable if rejected by EMI rule
 
-        final_interest_rate = corrected_interest_rate if corrected_interest_rate is not None else interest_rate
-        if corrected_interest_rate is not None and not approval:
-            final_interest_rate = corrected_interest_rate
-            approval = True
-
-        r = (final_interest_rate / 12) / 100
-        n = tenure
-        monthly_installment = (loan_amount * r * (1 + r)**n) / ((1 + r)**n - 1) if r > 0 else loan_amount / n
+        # Calculate EMI based on the final interest rate
+        monthly_installment = 0
+        if approval:
+            r = (final_interest_rate / 12) / 100
+            n = tenure
+            monthly_installment = (loan_amount * r * (1 + r)**n) / ((1 + r)**n - 1) if r > 0 else loan_amount / n
 
         response_data = {
-            'customer_id': customer_id, 'approval': approval, 'interest_rate': interest_rate,
-            'corrected_interest_rate': corrected_interest_rate, 'tenure': tenure,
+            'customer_id': customer_id,
+            'approval': approval,
+            'interest_rate': interest_rate,
+            'corrected_interest_rate': corrected_interest_rate,
+            'tenure': tenure,
             'monthly_installment': round(monthly_installment, 2)
         }
         
@@ -109,33 +126,34 @@ class CreateLoanAPIView(generics.GenericAPIView):
         credit_score = calculate_credit_score(customer_id)
         customer = Customer.objects.get(pk=customer_id)
         
+        # Re-use the exact same logic from eligibility check
+        approval = False
+        final_interest_rate = interest_rate
+        min_rate_for_tier = None
+        can_be_approved = True
+
+        if credit_score > 50: min_rate_for_tier = 10.0
+        elif 30 < credit_score <= 50: min_rate_for_tier = 12.0
+        elif 10 < credit_score <= 30: min_rate_for_tier = 16.0
+        else: can_be_approved = False
+
+        if can_be_approved:
+            if interest_rate >= min_rate_for_tier:
+                approval = True
+            else:
+                approval = True
+                final_interest_rate = min_rate_for_tier
+
         current_loans = Loan.objects.filter(customer=customer, end_date__gte=date.today())
         sum_of_emis = current_loans.aggregate(total_emi=Sum('monthly_repayment'))['total_emi'] or 0
+        if sum_of_emis > customer.monthly_salary / 2:
+            approval = False
 
-        approval = False
-        message = "Loan not approved due to low credit score or high existing debt."
-        
-        if sum_of_emis <= customer.monthly_salary / 2:
-            if credit_score > 50:
-                approval = True
-            elif 30 < credit_score <= 50 and interest_rate > 12:
-                approval = True
-            elif 10 < credit_score <= 30 and interest_rate > 16:
-                approval = True
-
-        final_interest_rate = interest_rate
-        if not approval:
-            if 30 < credit_score <= 50:
-                final_interest_rate = 12.0
-            elif 10 < credit_score <= 30:
-                final_interest_rate = 16.0
-            
-            if final_interest_rate != interest_rate:
-                 message = "Loan not approved at requested interest rate. Can be approved at a higher rate."
-                 approval = False # Keep approval false, but indicate a path forward
-
+        # --- Create Loan if Approved ---
         loan_id = None
         monthly_installment = 0
+        message = "Loan not approved. Customer does not meet eligibility criteria."
+
         if approval:
             message = "Loan approved successfully!"
             r = (final_interest_rate / 12) / 100
@@ -149,6 +167,10 @@ class CreateLoanAPIView(generics.GenericAPIView):
                 end_date=date.today() + timedelta(days=30 * tenure)
             )
             loan_id = new_loan.loan_id
+            
+            # Update customer's current debt
+            customer.current_debt += loan_amount
+            customer.save()
 
         response_data = {
             'loan_id': loan_id, 'customer_id': customer_id, 'loan_approved': approval,
